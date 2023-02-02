@@ -6,6 +6,12 @@ import time
 DEBUG = True
 TARGET_SITE = 'https://mediakit.iportal.ru/our-team'
 
+
+class Utils:
+    @staticmethod
+    def group(lst, n):
+        return [lst[i:i + n] for i in range(0, len(lst), n)]
+
 #метод чтобы не удалять print(X) со всего кода
 def log(log_string):
     if DEBUG:
@@ -37,7 +43,7 @@ class Data:
             actions.perform()
             button.click()
 
-
+        #t544
         elements = driver.find_elements(By.CLASS_NAME, 't544')
         for element in elements:
             name = element.find_element(By.CLASS_NAME,'t544__title').get_attribute('textContent')
@@ -48,6 +54,23 @@ class Data:
             self.Persons.append(person)
             log(person)
 
+        #t396
+        elements = driver.find_elements(By.CLASS_NAME, 't396')
+        for element in elements:
+            if 't-rec_pb_60' in element.find_element(By.XPATH, "..").get_attribute('class'):
+                log(element)
+                persons_elements = Utils.group(element.find_elements(By.CLASS_NAME, 't396__elem'), 6)
+                for person_element in persons_elements:
+                    city = person_element[0].find_element(By.CLASS_NAME, 'tn-atom').get_attribute('textContent')
+                    log(f'city {city}')
+                    name = person_element[4].find_element(By.CLASS_NAME, 'tn-atom').get_attribute('textContent')
+                    log(f'name {name}')
+                    position = person_element[5].find_element(By.CLASS_NAME, 'tn-atom').get_attribute('textContent')
+                    log(f'position {position}')
+                    email = city = person_element[5].find_element(By.TAG_NAME, 'a').get_attribute('textContent')
+                    log(f'email {email}')
+                    person = Person(city, name, position, email)
+                    log(person)
 
     def json_dump(self):
         pass
