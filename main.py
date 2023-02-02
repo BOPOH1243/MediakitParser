@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 import time
+from bs4 import BeautifulSoup
 
 DEBUG = True
 TARGET_SITE = 'https://mediakit.iportal.ru/our-team'
@@ -52,25 +53,54 @@ class Data:
             email = element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
             person = Person(city,name,position,email)
             self.Persons.append(person)
-            log(person)
+
+        menu = driver.find_element(By.CLASS_NAME, 't397__wrapper_mobile')
+        options = menu.find_elements(By.TAG_NAME, 'option')
+        ids = []
+        for option in options:
+            for id in option.get_attribute('value').split(','):
+                ids.append(id)
 
         #t396
-        elements = driver.find_elements(By.CLASS_NAME, 't396')
-        for element in elements:
-            if 't-rec_pb_60' in element.find_element(By.XPATH, "..").get_attribute('class'):
-                log(element)
-                persons_elements = Utils.group(element.find_elements(By.CLASS_NAME, 't396__elem'), 6)
-                for person_element in persons_elements:
-                    city = person_element[0].find_element(By.CLASS_NAME, 'tn-atom').get_attribute('textContent')
-                    log(f'city {city}')
-                    name = person_element[4].find_element(By.CLASS_NAME, 'tn-atom').get_attribute('textContent')
-                    log(f'name {name}')
-                    position = person_element[5].find_element(By.CLASS_NAME, 'tn-atom').get_attribute('textContent')
-                    log(f'position {position}')
-                    email = city = person_element[5].find_element(By.TAG_NAME, 'a').get_attribute('textContent')
-                    log(f'email {email}')
-                    person = Person(city, name, position, email)
-                    log(person)
+        for id in ids:
+            elements = []
+            try:
+                element = driver.find_element(By.ID, f'rec{id}')
+                elements.append(element)
+            except:
+                log(f'id {id} не имеет элемента')
+            for element in elements:
+                persons = []
+                for data_element in element.find_elements(By.CLASS_NAME,'t396__elem'):
+                    if data_element.get_attribute('data-elem-id')=='1596441248760':
+                        if len(persons)==0:
+                            persons.append(Person('','','',''))
+                        #это город перса0
+                        persons[0].city = data_element.get_attribute('textContent')
+                    elif data_element.get_attribute('data-elem-id')in ['1599793822858', '1596441301499']:
+                        if len(persons)==0:
+                            persons.append(Person('','','',''))
+                        #это имя перса0
+                        persons[0].name = data_element.get_attribute('textContent')
+                    elif data_element.get_attribute('data-elem-id')=='1599793822884':
+                        #это должность и мейл перса0
+                        if len(persons)==0:
+                            persons.append(Person('','','',''))
+                        soup = BeautifulSoup(data_element.get_attribute("innerHTML"), 'html.parser')
+                        persons[0].position = soup.find('div', {"class": "tn-atom"}).text
+                        log(persons[0].position)
+                        try:
+                            persons[0].email=soup.find('a').text
+                        except:
+                            pass
+                for person in persons:
+                    self.Persons.append(person)
+
+        for person in self.Persons:
+            pass
+            log(person)
+
+
 
     def json_dump(self):
         pass
