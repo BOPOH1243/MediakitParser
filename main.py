@@ -36,15 +36,17 @@ class Data:
             actions.move_to_element(button)
             actions.perform()
             button.click()
-            time.sleep(1)
 
 
         elements = driver.find_elements(By.CLASS_NAME, 't544')
         for element in elements:
             name = element.find_element(By.CLASS_NAME,'t544__title').get_attribute('textContent')
-            log(name)
             position = element.find_element(By.CLASS_NAME, 't544__descr').get_attribute('textContent')
-            log(position)
+            city = "..."
+            email = element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
+            person = Person(city,name,position,email)
+            self.Persons.append(person)
+            log(person)
 
 
     def json_dump(self):
