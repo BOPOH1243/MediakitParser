@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+import time
 
 DEBUG = True
 TARGET_SITE = 'https://mediakit.iportal.ru/our-team'
@@ -27,17 +29,22 @@ class Data:
     def collect(self):
         driver = webdriver.Chrome()
         driver.get(TARGET_SITE)
-        #button_parts = driver.find_elements(By.CLASS_NAME, 't397__width_33')
-        parts = driver.find_elements(By.CLASS_NAME, "t397__wrapper_mobile")[0]
-        log(parts)
-        ids=[]
-        for option in parts.find_elements(By.TAG_NAME, 'option'):
-            ids.append([int(i) for i in option.get_attribute('value').split(',')])
-        log(ids)
-        for ids_list in ids:
-            for card_id in ids_list:
-                log(card_id)
-                log(driver.find_elements(By.ID, f'rec{card_id}'))
+        actions = ActionChains(driver)
+        buttons = driver.find_elements(By.CLASS_NAME, 't397__tab')[:3]
+
+        for button in buttons:
+            actions.move_to_element(button)
+            actions.perform()
+            button.click()
+            time.sleep(1)
+
+
+        elements = driver.find_elements(By.CLASS_NAME, 't544')
+        for element in elements:
+            name = element.find_element(By.CLASS_NAME,'t544__title').get_attribute('textContent')
+            log(name)
+            position = element.find_element(By.CLASS_NAME, 't544__descr').get_attribute('textContent')
+            log(position)
 
 
     def json_dump(self):
@@ -50,4 +57,3 @@ class Data:
 if __name__ == '__main__':
     data = Data()
     data.collect()
-    print(data.json_dump())
