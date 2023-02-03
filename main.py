@@ -1,5 +1,5 @@
 import re
-
+import csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -134,10 +134,15 @@ class Data:
     def json_dump(self):
         pass
 
-    def csv_dump(self):
-        pass
+    def csv_dump(self, filename):
+        with open(f'{filename}.csv', 'w', newline='', encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile, delimiter = ",", lineterminator="\r")
+            writer.writerow(["Имя", "Город", "Позиция", "имейл"])
+            for person in self.Persons:
+                writer.writerow([person.name, person.city, person.position, person.email])
 
 
 if __name__ == '__main__':
     data = Data()
     data.collect()
+    data.csv_dump('dump')
