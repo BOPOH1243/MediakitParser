@@ -62,6 +62,10 @@ class Data:
                 ids.append(id)
 
         #t396
+        log(ids)
+        name_ids = ['1635348635117']
+        city_ids = ['1635348635083']
+        position_ids = ['1635348635122']
         for id in ids:
             elements = []
             try:
@@ -70,34 +74,48 @@ class Data:
             except:
                 log(f'id {id} не имеет элемента')
             for element in elements:
-                persons = []
-                for data_element in element.find_elements(By.CLASS_NAME,'t396__elem'):
-                    if data_element.get_attribute('data-elem-id')=='1596441248760':
-                        if len(persons)==0:
-                            persons.append(Person('','','',''))
-                        #это город перса0
-                        persons[0].city = data_element.get_attribute('textContent')
-                    elif data_element.get_attribute('data-elem-id')in ['1599793822858', '1596441301499']:
-                        if len(persons)==0:
-                            persons.append(Person('','','',''))
-                        #это имя перса0
-                        persons[0].name = data_element.get_attribute('textContent')
-                    elif data_element.get_attribute('data-elem-id')=='1599793822884':
-                        #это должность и мейл перса0
-                        if len(persons)==0:
-                            persons.append(Person('','','',''))
-                        soup = BeautifulSoup(data_element.get_attribute("innerHTML"), 'html.parser')
-                        persons[0].position = soup.find('div', {"class": "tn-atom"}).text
-                        log(persons[0].position)
-                        try:
-                            persons[0].email=soup.find('a').text
-                        except:
-                            pass
-                for person in persons:
-                    self.Persons.append(person)
+                person_left = None
+                person_right = None
+                for data_element in element.find_elements(By.CLASS_NAME, 't396__elem'):
+                    if data_element.get_attribute('data-elem-id') in name_ids: #это имя
+                        if int(data_element.get_attribute('data-field-left-value'))<600:
+                            if person_left == None:
+                                person_left = Person('','','','')
+                            person_left.name = data_element.get_attribute('textContent')
+                        else:
+                            if person_right == None:
+                                person_right = Person('','','','')
+                            person_right.name = data_element.get_attribute('textContent')
 
+                    elif data_element.get_attribute('data-elem-id') in city_ids: #это город
+                        if int(data_element.get_attribute('data-field-left-value'))<600:
+                            if person_left == None:
+                                person_left = Person('','','','')
+                            person_left.city = data_element.get_attribute('textContent')
+                        else:
+                            if person_right == None:
+                                person_right = Person('','','','')
+                            person_right.city = data_element.get_attribute('textContent')
+
+                    elif data_element.get_attribute('data-elem-id') in position_ids: #это город
+                        if int(data_element.get_attribute('data-field-left-value'))<600:
+                            if person_left == None:
+                                person_left = Person('','','','')
+                            person_left.position = data_element.get_attribute('textContent')
+                            person_left.email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
+                            person_left.position = person_left.position.replace(person_left.email,'')
+                        else:
+                            if person_right == None:
+                                person_right = Person('','','','')
+                            person_right.position = data_element.get_attribute('textContent')
+                            person_right.email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
+                            person_right.position = person_right.position.replace(person_right.email, '')
+
+                if not (person_left == None):
+                    self.Persons.append(person_left)
+                if not (person_right == None):
+                    self.Persons.append(person_right)
         for person in self.Persons:
-            pass
             log(person)
 
 
