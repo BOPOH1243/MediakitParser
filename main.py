@@ -43,19 +43,19 @@ class Data:
         person_left = None
         person_right = None
         def parse_name(data_element):
-            return data_element.get_attribute('textContent')
+            return data_element.get_attribute('textContent').strip()
         def parse_city(data_element):
-            return data_element.get_attribute('textContent')
+            return data_element.get_attribute('textContent').strip()
         def parse_position_email(data_element):
             position = data_element.get_attribute('textContent')
             email = ''
             try:
-                email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
+                email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent').strip()
             except:
                 pass
-            position = person_left.position.replace(person_left.email, '')
+            position = position.replace(person_left.email, '')
             position = re.sub(r'[^\w\s]+|[\d]+', r'', person_left.position).strip()
-            position = person_left.position.split('   ')[0]
+            position = position.split('   ')[0].strip()
             return position, email
 
         for data_element in element.find_elements(By.CLASS_NAME, 't396__elem'):
