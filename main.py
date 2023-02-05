@@ -3,17 +3,11 @@ import csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-import time
-from bs4 import BeautifulSoup
+from progress.bar import IncrementalBar
 
-DEBUG = True
+DEBUG = False
 TARGET_SITE = 'https://mediakit.iportal.ru/our-team'
 
-
-class Utils:
-    @staticmethod
-    def group(lst, n):
-        return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 #метод чтобы не удалять print(X) со всего кода
 def log(log_string):
@@ -42,17 +36,17 @@ class Data:
         position_ids = ['1635348635122', '1596441835072', '1596441448712', '1652701973284', '1648717229809', '1642996413676', '1599793822884', '1673600278530', '1643959011978', '1629779928286', '1652701843642', '1596441835072', '1652700889499', '1652700178564', '1637296945030']
         person_left = None
         person_right = None
+
         def parse_name(data_element):
             return data_element.get_attribute('textContent').strip()
         def parse_city(data_element):
             return data_element.get_attribute('textContent').strip()
         def parse_position_email(data_element):
             position = data_element.get_attribute('textContent')
-            email = ''
             try:
                 email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent').strip()
             except:
-                pass
+                email = ''
             position = position.replace(person_left.email, '')
             position = re.sub(r'[^\w\s]+|[\d]+', r'', person_left.position).strip()
             position = position.split('   ')[0].strip()
@@ -124,8 +118,9 @@ class Data:
                 ids.append(id)
 
         #t396
-        log(ids)
+        bar = IncrementalBar('Countdown', max=len(ids))
         for id in ids:
+
             elements = []
             try:
                 element = driver.find_element(By.ID, f'rec{id}')
@@ -134,6 +129,8 @@ class Data:
                 log(f'id {id} не имеет элемента')
             for element in elements:
                 self.__parse_element(element)
+            bar.next()
+        bar.finish()
         for person in self.Persons:
             log(person)
 
