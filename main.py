@@ -42,50 +42,52 @@ class Data:
         position_ids = ['1635348635122', '1596441835072', '1596441448712', '1652701973284', '1648717229809', '1642996413676', '1599793822884', '1673600278530', '1643959011978', '1629779928286', '1652701843642', '1596441835072', '1652700889499', '1652700178564', '1637296945030']
         person_left = None
         person_right = None
+        def parse_name(data_element):
+            return data_element.get_attribute('textContent')
+        def parse_city(data_element):
+            return data_element.get_attribute('textContent')
+        def parse_position_email(data_element):
+            position = data_element.get_attribute('textContent')
+            email = ''
+            try:
+                email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
+            except:
+                pass
+            position = person_left.position.replace(person_left.email, '')
+            position = re.sub(r'[^\w\s]+|[\d]+', r'', person_left.position).strip()
+            position = person_left.position.split('   ')[0]
+            return position, email
+
         for data_element in element.find_elements(By.CLASS_NAME, 't396__elem'):
             if data_element.get_attribute('data-elem-id') in name_ids:  # это имя
                 if int(data_element.get_attribute('data-field-left-value')) < 600:
                     if person_left == None:
                         person_left = Person('', '', '', '')
-                    person_left.name = data_element.get_attribute('textContent')
+                    person_left.name = parse_name(data_element)
                 else:
                     if person_right == None:
                         person_right = Person('', '', '', '')
-                    person_right.name = data_element.get_attribute('textContent')
+                    person_right.name = parse_name(data_element)
 
             elif data_element.get_attribute('data-elem-id') in city_ids:  # это город
                 if int(data_element.get_attribute('data-field-left-value')) < 600:
                     if person_left == None:
                         person_left = Person('', '', '', '')
-                    person_left.city = data_element.get_attribute('textContent')
+                    person_left.city = parse_city(data_element)
                 else:
                     if person_right == None:
                         person_right = Person('', '', '', '')
-                    person_right.city = data_element.get_attribute('textContent')
+                    person_right.city = parse_city(data_element)
 
             elif data_element.get_attribute('data-elem-id') in position_ids:  # это город
                 if int(data_element.get_attribute('data-field-left-value')) < 600:
                     if person_left == None:
                         person_left = Person('', '', '', '')
-                    person_left.position = data_element.get_attribute('textContent')
-                    try:
-                        person_left.email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
-                    except:
-                        pass
-                    person_left.position = person_left.position.replace(person_left.email, '')
-                    person_left.position = re.sub(r'[^\w\s]+|[\d]+', r'', person_left.position).strip()
-                    person_left.position = person_left.position.split('   ')[0]
+                    person_left.position,person_left.email = parse_position_email(data_element)
                 else:
                     if person_right == None:
                         person_right = Person('', '', '', '')
-                    person_right.position = data_element.get_attribute('textContent')
-                    try:
-                        person_right.email = data_element.find_element(By.TAG_NAME, 'a').get_attribute('textContent')
-                    except:
-                        pass
-                    person_right.position = person_right.position.replace(person_right.email, '')
-                    person_right.position = re.sub(r'[^\w\s]+|[\d]+', r'', person_right.position).strip()
-                    person_right.position = person_right.position.split('   ')[0]
+                    person_right.position,person_right.email = parse_position_email(data_element)
         if not (person_left == None):
             self.Persons.append(person_left)
         if not (person_right == None):
